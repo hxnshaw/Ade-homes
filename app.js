@@ -1,1 +1,1 @@
-console.log("Ade Homes");
+console.log("Ade Homes, coming soon!");
