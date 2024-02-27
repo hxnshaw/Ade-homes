@@ -1,5 +1,6 @@
 "use strict";
 const { Model } = require("sequelize");
+const bcrypt = require("bcrypt");
 module.exports = (sequelize, DataTypes) => {
   class Buyer extends Model {
     /**
@@ -41,5 +42,21 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Buyer",
     }
   );
+  //hash password
+  Buyer.addHook("beforeSave", async function (buyer) {
+    if (!buyer.changed("password")) return;
+    const salt = await bcrypt.genSaltSync(10);
+    buyer.password = await bcrypt.hashSync(buyer.password, salt);
+  });
+
+  //Compare password during user login
+  Buyer.prototype.comparePassword = async function (buyerPassword) {
+    const buyer = this;
+    const isMatch = await bcrypt.compare(buyerPassword, buyer.password);
+    if (!isMatch) {
+      throw new Error("Invalid Credentials");
+    }
+  };
+
   return Buyer;
 };
